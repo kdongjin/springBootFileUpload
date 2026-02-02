@@ -2,6 +2,7 @@ package com.zeus.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 import org.mybatis.spring.annotation.MapperScan;
@@ -49,22 +50,39 @@ public class ItemController {
 		log.info("size: " + file.getSize());
 		log.info("contentType:" + file.getContentType());
 		// 3. 파일을 외장하드에 저장
-		String createdFileName = uploadFile(file.getOriginalFilename(),file.getBytes());
+		String createdFileName = uploadFile(file.getOriginalFilename(), file.getBytes());
 
-		// 4. 저장된 새로운생성된 파일명을 item 도메인에 저장. 
+		// 4. 저장된 새로운생성된 파일명을 item 도메인에 저장.
 		item.setUrl(createdFileName);
-		// 5. 테이블에 상품화면정보를 저장 
+		// 5. 테이블에 상품화면정보를 저장
 		int count = itemService.create(item);
-		
-		if(count > 0) {
-			model.addAttribute("message",
-					"%s 상품등록이 성공".formatted(file.getOriginalFilename())); 
-			return "item/success"; 
+
+		if (count > 0) {
+			model.addAttribute("message", "%s 상품등록이 성공".formatted(file.getOriginalFilename()));
+			return "item/success";
 		}
-		model.addAttribute("message",
-				"%s 상품등록이 실패".formatted(file.getOriginalFilename())); 
+		model.addAttribute("message", "%s 상품등록이 실패".formatted(file.getOriginalFilename()));
 		return "item/failed";
 	}
+
+	@GetMapping("/list")
+	public String itemList(Model model) throws Exception {
+		log.info("/itemList");
+		List<Item> itemList = itemService.list();
+		model.addAttribute("itemList", itemList);
+		return "item/list";
+	}
+	
+	@GetMapping("/detail")
+	
+	public String itemDetail(Item item, Model model) throws Exception {
+		log.info("/detail");
+		List<Item> itemList = itemService.list();
+		model.addAttribute("itemList", itemList);
+		return "item/list";
+	}
+	
+	
 
 	private String uploadFile(String originalName, byte[] fileData) throws Exception {
 		// 절대중복되지 않는 문자열 생성 (cdc39bc0-a135-4f2b-8526-018ff1ee1b46)
